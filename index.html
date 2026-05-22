@@ -1,0 +1,492 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logical Thinking Tracker</title>
+<style>
+:root{
+  --font-sans: Arial, Helvetica, sans-serif;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f7fb;
+  --color-background-info:#e6f1fb;
+  --color-background-success:#e9f7ef;
+  --color-background-danger:#fdecec;
+  --color-border-secondary:#d8dee9;
+  --color-border-tertiary:#e8edf4;
+  --color-border-info:#9cc9f0;
+  --color-border-success:#99d8b1;
+  --color-border-danger:#f1a4a4;
+  --color-text-primary:#1f2937;
+  --color-text-secondary:#5b6472;
+  --color-text-tertiary:#9aa3af;
+  --color-text-info:#185fa5;
+  --color-text-success:#18794e;
+  --color-text-danger:#b42318;
+}
+body{
+  font-family:var(--font-sans);
+  background:#f3f6fa;
+  color:var(--color-text-primary);
+  padding:24px;
+}
+body > div{
+  max-width:1200px;
+  margin:0 auto;
+  background:#fff;
+  border:1px solid var(--color-border-tertiary);
+  border-radius:16px;
+  padding:24px !important;
+  box-shadow:0 8px 24px rgba(15,23,42,0.06);
+}
+@media(max-width:800px){
+  body{padding:12px;}
+  div[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:repeat(2,1fr)!important;}
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+.tab{padding:7px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);font-size:13px;cursor:pointer;transition:all 0.15s;}
+.tab.active{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info);font-weight:500;}
+.tab:hover:not(.active){background:var(--color-background-secondary);}
+.view{display:none;}.view.active{display:block;}
+.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 16px;}
+.metric-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;}
+.metric-val{font-size:20px;font-weight:500;color:var(--color-text-primary);}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;}
+.section-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px;}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);font-weight:400;}
+.cat-badge{background:var(--color-background-info);color:var(--color-text-info);}
+.prog-wrap{flex:1;height:6px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:4px;transition:width 0.3s;}
+.member-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;}
+.leaderboard-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);margin-bottom:8px;}
+.q-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;margin-bottom:12px;}
+.q-card:hover{border-color:var(--color-border-secondary);}
+.answer-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;margin-top:10px;font-size:13px;color:var(--color-text-primary);line-height:1.6;display:none;}
+.answer-box.visible{display:block;}
+.attempt-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:0.5px solid var(--color-border-tertiary);margin-top:8px;}
+.btn-sm{padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);font-size:12px;cursor:pointer;}
+.btn-sm:hover{background:var(--color-background-secondary);}
+.btn-correct{background:var(--color-background-success);color:var(--color-text-success);border-color:var(--color-border-success);}
+.btn-wrong{background:var(--color-background-danger);color:var(--color-text-danger);border-color:var(--color-border-danger);}
+.btn-primary{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info);font-weight:500;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px;display:block;}
+textarea,select,input[type=text]{width:100%;padding:8px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans);resize:vertical;}
+textarea:focus,select:focus,input[type=text]:focus{outline:none;box-shadow:0 0 0 2px var(--color-background-info);}
+.filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--color-text-secondary);font-size:13px;}
+.tabs-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;}
+.cat-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);margin-bottom:7px;}
+.small-input{width:52px;padding:4px 6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;text-align:center;}
+.member-tab-label{display:flex;align-items:center;gap:6px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem;}
+input[type=number]::-webkit-inner-spin-button{opacity:1;}
+</style>
+</head>
+<body>
+
+<h2 class="sr-only">Logical thinking progress tracker with question and answer bank</h2>
+<div style="padding:1rem 0;">
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px;">
+  <div>
+    <p style="font-size:18px;font-weight:500;color:var(--color-text-primary);">Logical thinking tracker</p>
+    <p style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Progress + question bank for your team of 4</p>
+  </div>
+  <button onclick="resetAll()" style="font-size:12px;padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;"><i class="ti ti-refresh" aria-hidden="true"></i> Reset all</button>
+</div>
+
+<div class="tabs-wrap" id="mainTabs">
+  <button class="tab active" onclick="switchView('leaderboard',this)"><i class="ti ti-trophy" aria-hidden="true"></i> Leaderboard</button>
+  <button class="tab" onclick="switchView('questions',this)"><i class="ti ti-books" aria-hidden="true"></i> Question bank</button>
+  <button class="tab" onclick="switchView('m0',this)" id="tab-m0"><span class="member-tab-label"><span id="av0" class="member-avatar" style="width:18px;height:18px;font-size:9px;background:#E6F1FB;color:#185FA5;">M1</span><span id="tn0">Member 1</span></span></button>
+  <button class="tab" onclick="switchView('m1',this)" id="tab-m1"><span class="member-tab-label"><span id="av1" class="member-avatar" style="width:18px;height:18px;font-size:9px;background:#E1F5EE;color:#0F6E56;">M2</span><span id="tn1">Member 2</span></span></button>
+  <button class="tab" onclick="switchView('m2',this)" id="tab-m2"><span class="member-tab-label"><span id="av2" class="member-avatar" style="width:18px;height:18px;font-size:9px;background:#FAEEDA;color:#854F0B;">M3</span><span id="tn2">Member 3</span></span></button>
+  <button class="tab" onclick="switchView('m3',this)" id="tab-m3"><span class="member-tab-label"><span id="av3" class="member-avatar" style="width:18px;height:18px;font-size:9px;background:#FBEAF0;color:#993556;">M4</span><span id="tn3">Member 4</span></span></button>
+</div>
+
+<div class="view active" id="view-leaderboard"></div>
+<div class="view" id="view-questions"></div>
+<div class="view" id="view-m0"></div>
+<div class="view" id="view-m1"></div>
+<div class="view" id="view-m2"></div>
+<div class="view" id="view-m3"></div>
+
+</div>
+
+<script>
+const CATEGORIES=['Number Series','Letter and Symbol Series','Verbal Classification','Essential Part','Analogies','Artificial Language','Matching Definitions','Making Judgments','Verbal Reasoning','Logical Problems','Logical Games','Analyzing Arguments','Statement and Assumption','Course of Action','Statement and Conclusion','Theme Detection','Cause and Effect','Statement and Argument','Logical Deduction'];
+
+const MEMBERS=[
+  {name:'Member 1',initials:'M1',bg:'#E6F1FB',color:'#185FA5',barColor:'#378ADD'},
+  {name:'Member 2',initials:'M2',bg:'#E1F5EE',color:'#0F6E56',barColor:'#1D9E75'},
+  {name:'Member 3',initials:'M3',bg:'#FAEEDA',color:'#854F0B',barColor:'#BA7517'},
+  {name:'Member 4',initials:'M4',bg:'#FBEAF0',color:'#993556',barColor:'#D4537E'}
+];
+
+const SK='lt_v2';
+function loadData(){
+  try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}
+  const d={members:MEMBERS.map(m=>({name:m.name,cats:{}})),questions:[],nextId:1};
+  CATEGORIES.forEach(c=>d.members.forEach(m=>{m.cats[c]={attempted:0,correct:0};}));
+  return d;
+}
+function save(){try{localStorage.setItem(SK,JSON.stringify(data));}catch(e){}}
+
+let data=loadData();
+let currentView='leaderboard';
+let qFilter='all';
+let showAddForm=false;
+let revealedAnswers={};
+let expandedAttempts={};
+
+function barColor(p){return p>=80?'#639922':p>=60?'#BA7517':'#E24B4A';}
+
+function memberScore(mi){
+  let att=0,cor=0;
+  CATEGORIES.forEach(c=>{att+=data.members[mi].cats[c].attempted;cor+=data.members[mi].cats[c].correct;});
+  return{attempted:att,correct:cor,pct:att>0?Math.round(cor/att*100):0};
+}
+
+function renderLeaderboard(){
+  const sorted=MEMBERS.map((m,i)=>({...m,idx:i,nm:data.members[i].name,score:memberScore(i)}))
+    .sort((a,b)=>b.score.correct-a.score.correct||b.score.pct-a.score.pct);
+  const rankC=['#EF9F27','#888780','#D85A30','#B4B2A9'];
+  const rankBg=['#FAEEDA','#F1EFE8','#FAECE7','#F1EFE8'];
+  const totalQ=data.questions.length;
+
+  let html=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;">
+    <div class="metric-card"><div class="metric-label">Questions posted</div><div class="metric-val">${totalQ}</div></div>
+    <div class="metric-card"><div class="metric-label">Categories covered</div><div class="metric-val">${new Set(data.questions.map(q=>q.cat)).size}</div></div>
+    <div class="metric-card"><div class="metric-label">Total attempts</div><div class="metric-val">${MEMBERS.reduce((s,m,i)=>s+memberScore(i).attempted,0)}</div></div>
+    <div class="metric-card"><div class="metric-label">Team avg accuracy</div><div class="metric-val">${(()=>{let a=0,c=0;MEMBERS.forEach((m,i)=>{const s=memberScore(i);a+=s.attempted;c+=s.correct;});return a>0?Math.round(c/a*100):0;})()}%</div></div>
+  </div>
+  <p class="section-title">Team standings</p>`;
+
+  sorted.forEach((m,rank)=>{
+    const s=m.score;
+    const qAnswered=data.questions.filter(q=>q.attempts&&q.attempts[m.idx]!==undefined).length;
+    html+=`<div class="leaderboard-row">
+      <div style="width:24px;height:24px;border-radius:50%;background:${rankBg[rank]};color:${rankC[rank]};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;">${rank+1}</div>
+      <div class="member-avatar" style="background:${m.bg};color:${m.color};">${m.initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">${m.nm}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:1px;">${qAnswered}/${totalQ} questions answered · ${s.attempted} total attempts</div>
+      </div>
+      <div class="prog-wrap" style="max-width:120px;">
+        <div class="prog-bar" style="width:${s.pct}%;background:${m.barColor};"></div>
+      </div>
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:38px;text-align:right;">${s.correct}<span style="font-size:11px;color:var(--color-text-secondary);font-weight:400;"> pts</span></div>
+      <div style="font-size:12px;color:var(--color-text-secondary);min-width:32px;text-align:right;">${s.pct}%</div>
+    </div>`;
+  });
+
+  html+=`<p class="section-title" style="margin-top:1.5rem;">Category overview</p>
+  <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
+  <tr><th style="text-align:left;padding:6px 8px;color:var(--color-text-secondary);font-weight:400;border-bottom:0.5px solid var(--color-border-tertiary);">Category</th>
+  <th style="text-align:center;padding:6px 8px;color:var(--color-text-secondary);font-weight:400;border-bottom:0.5px solid var(--color-border-tertiary);">Qs</th>`;
+  MEMBERS.forEach((m,i)=>{html+=`<th style="text-align:center;padding:6px 8px;color:${m.color};font-weight:400;border-bottom:0.5px solid var(--color-border-tertiary);">${data.members[i].name.split(' ')[0]}</th>`;});
+  html+=`</tr>`;
+  CATEGORIES.forEach(cat=>{
+    const qCount=data.questions.filter(q=>q.cat===cat).length;
+    html+=`<tr><td style="padding:6px 8px;color:var(--color-text-primary);border-bottom:0.5px solid var(--color-border-tertiary);">${cat}</td>
+    <td style="text-align:center;padding:6px 8px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">${qCount||'—'}</td>`;
+    MEMBERS.forEach((m,mi)=>{
+      const d2=data.members[mi].cats[cat];
+      const p=d2.attempted>0?Math.round(d2.correct/d2.attempted*100):null;
+      html+=`<td style="text-align:center;padding:6px 8px;color:${p!==null?barColor(p):'var(--color-text-tertiary)'};border-bottom:0.5px solid var(--color-border-tertiary);font-weight:${p!==null?'500':'400'};">${p!==null?p+'%':'—'}</td>`;
+    });
+    html+=`</tr>`;
+  });
+  html+=`</table></div>`;
+  document.getElementById('view-leaderboard').innerHTML=html;
+}
+
+function renderQuestions(){
+  const cats=['all',...CATEGORIES];
+  const filtered=qFilter==='all'?data.questions:data.questions.filter(q=>q.cat===qFilter);
+
+  let html=`<div class="filter-bar">
+    <select onchange="qFilter=this.value;renderQuestions();" style="flex:1;max-width:260px;">
+      ${cats.map(c=>`<option value="${c}" ${qFilter===c?'selected':''}>${c==='all'?'All categories':c}</option>`).join('')}
+    </select>
+    <span style="font-size:12px;color:var(--color-text-secondary);margin-left:4px;">${filtered.length} question${filtered.length!==1?'s':''}</span>
+    <button onclick="toggleAddForm()" class="btn-sm btn-primary" style="margin-left:auto;"><i class="ti ti-plus" aria-hidden="true"></i> Add question</button>
+  </div>`;
+
+  if(showAddForm){
+    html+=`<div class="card" style="margin-bottom:1.5rem;border-color:var(--color-border-info);">
+      <p style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:14px;"><i class="ti ti-pencil" aria-hidden="true"></i> Post a new question</p>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select id="nq-cat"><option value="">Select category…</option>${CATEGORIES.map(c=>`<option>${c}</option>`).join('')}</select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Question</label>
+        <textarea id="nq-q" rows="3" placeholder="Type the question here…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Options (A, B, C, D — one per line, optional)</label>
+        <textarea id="nq-opts" rows="4" placeholder="A. Option one&#10;B. Option two&#10;C. Option three&#10;D. Option four"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correct answer / explanation</label>
+        <textarea id="nq-a" rows="2" placeholder="The answer is B because…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Posted by</label>
+        <select id="nq-by"><option value="">Select member…</option>${MEMBERS.map((m,i)=>`<option value="${i}">${data.members[i].name}</option>`).join('')}</select>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="addQuestion()" class="btn-sm btn-primary">Post question</button>
+        <button onclick="showAddForm=false;renderQuestions();" class="btn-sm">Cancel</button>
+      </div>
+    </div>`;
+  }
+
+  if(filtered.length===0){
+    html+=`<div class="empty-state"><i class="ti ti-question-mark" style="font-size:32px;display:block;margin-bottom:8px;" aria-hidden="true"></i>No questions yet${qFilter!=='all'?' in this category':''}<br><span style="font-size:12px;margin-top:4px;display:block;">Click "Add question" to get started</span></div>`;
+  } else {
+    filtered.slice().reverse().forEach(q=>{
+      const revealed=revealedAnswers[q.id];
+      const attOpen=expandedAttempts[q.id];
+      const poster=q.postedBy!==undefined?MEMBERS[q.postedBy]:null;
+      const attCount=q.attempts?Object.keys(q.attempts).length:0;
+      const correctCount=q.attempts?Object.values(q.attempts).filter(v=>v===true).length:0;
+
+      html+=`<div class="q-card">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+              <span class="badge cat-badge">${q.cat}</span>
+              ${poster?`<span style="font-size:11px;color:var(--color-text-secondary);">by <span style="color:${MEMBERS[q.postedBy].color};font-weight:500;">${data.members[q.postedBy].name}</span></span>`:''}
+              <span style="font-size:11px;color:var(--color-text-tertiary);margin-left:auto;">#${q.id}</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-primary);line-height:1.6;font-weight:500;">${escHtml(q.question)}</p>
+            ${q.options?`<div style="margin-top:8px;font-size:12px;color:var(--color-text-secondary);white-space:pre-line;line-height:1.7;">${escHtml(q.options)}</div>`:''}
+          </div>
+          <button onclick="deleteQuestion(${q.id})" style="padding:4px 6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-tertiary);cursor:pointer;flex-shrink:0;" title="Delete question"><i class="ti ti-trash" style="font-size:14px;" aria-label="Delete question"></i></button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <button onclick="toggleAnswer(${q.id})" class="btn-sm">
+            <i class="ti ti-${revealed?'eye-off':'eye'}" style="font-size:13px;" aria-hidden="true"></i> ${revealed?'Hide answer':'Show answer'}
+          </button>
+          <button onclick="toggleAttempts(${q.id})" class="btn-sm">
+            <i class="ti ti-users" style="font-size:13px;" aria-hidden="true"></i> Mark attempts (${attCount}/4)
+          </button>
+          ${attCount>0?`<span style="font-size:11px;color:var(--color-text-secondary);margin-left:4px;">${correctCount}/${attCount} correct</span>`:''}
+        </div>
+
+        <div class="answer-box ${revealed?'visible':''}">
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;">Answer</div>
+          ${escHtml(q.answer)}
+        </div>
+
+        ${attOpen?`<div style="margin-top:10px;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;">
+          <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;font-weight:500;">Mark each member's attempt:</p>
+          ${MEMBERS.map((m,mi)=>{
+            const attempt = q.attempts ? q.attempts[mi] : undefined;
+            const hasAtt=attempt!==undefined;
+            return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <div class="member-avatar" style="background:${m.bg};color:${m.color};width:26px;height:26px;font-size:10px;">${m.initials}</div>
+              <span style="font-size:12px;color:var(--color-text-primary);flex:1;">${data.members[mi].name}</span>
+              <button onclick="markAttempt(${q.id},${mi},true)" class="btn-sm ${hasAtt&&attempt===true?'btn-correct':''}"><i class="ti ti-check" aria-hidden="true"></i> Correct</button>
+              <button onclick="markAttempt(${q.id},${mi},false)" class="btn-sm ${hasAtt&&attempt===false?'btn-wrong':''}"><i class="ti ti-x" aria-hidden="true"></i> Wrong</button>
+              ${hasAtt?`<button onclick="clearAttempt(${q.id},${mi})" class="btn-sm" title="Clear"><i class="ti ti-rotate" style="font-size:12px;" aria-label="Clear attempt"></i></button>`:''}
+            </div>`;
+          }).join('')}
+        </div>`:''}
+      </div>`;
+    });
+  }
+  document.getElementById('view-questions').innerHTML=html;
+}
+
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+function toggleAddForm(){showAddForm=!showAddForm;renderQuestions();}
+
+function addQuestion(){
+  const cat=document.getElementById('nq-cat').value;
+  const q=document.getElementById('nq-q').value.trim();
+  const opts=document.getElementById('nq-opts').value.trim();
+  const a=document.getElementById('nq-a').value.trim();
+  const by=document.getElementById('nq-by').value;
+  if(!cat){alert('Please select a category.');return;}
+  if(!q){alert('Please enter a question.');return;}
+  if(!a){alert('Please enter the answer.');return;}
+  const qObj={id:data.nextId++,cat,question:q,answer:a,attempts:{}};
+  if(opts)qObj.options=opts;
+  if(by!=='')qObj.postedBy=parseInt(by);
+  data.questions.push(qObj);
+  save();
+  showAddForm=false;
+  renderQuestions();
+  renderLeaderboard();
+}
+
+function deleteQuestion(id){
+  if(!confirm('Delete this question?'))return;
+  const q=data.questions.find(q=>q.id===id);
+  if(q&&q.attempts){
+    Object.entries(q.attempts).forEach(([mi,correct])=>{
+      const cat=q.cat;
+      const m=data.members[parseInt(mi)];
+      if(m.cats[cat].attempted>0){
+        m.cats[cat].attempted--;
+        if(correct)m.cats[cat].correct--;
+      }
+    });
+  }
+  data.questions=data.questions.filter(q=>q.id!==id);
+  delete revealedAnswers[id];
+  delete expandedAttempts[id];
+  save();
+  renderQuestions();
+  renderLeaderboard();
+}
+
+function toggleAnswer(id){revealedAnswers[id]=!revealedAnswers[id];renderQuestions();}
+function toggleAttempts(id){expandedAttempts[id]=!expandedAttempts[id];renderQuestions();}
+
+function markAttempt(qid,mi,correct){
+  const q=data.questions.find(q=>q.id===qid);
+  if(!q)return;
+  if(!q.attempts)q.attempts={};
+  const prev=q.attempts[mi];
+  const cat=q.cat;
+  const m=data.members[mi];
+  if(prev===undefined){
+    m.cats[cat].attempted++;
+    if(correct)m.cats[cat].correct++;
+  } else if(prev!==correct){
+    if(correct)m.cats[cat].correct++;
+    else m.cats[cat].correct--;
+  }
+  q.attempts[mi]=correct;
+  save();
+  renderQuestions();
+  if(currentView==='leaderboard')renderLeaderboard();
+  else if(currentView.startsWith('m'))renderMember(parseInt(currentView.replace('m','')));
+}
+
+function clearAttempt(qid,mi){
+  const q=data.questions.find(q=>q.id===qid);
+  if(!q||!q.attempts||q.attempts[mi]===undefined)return;
+  const cat=q.cat;
+  const m=data.members[mi];
+  m.cats[cat].attempted--;
+  if(q.attempts[mi])m.cats[cat].correct--;
+  delete q.attempts[mi];
+  save();
+  renderQuestions();
+  if(currentView==='leaderboard')renderLeaderboard();
+  else if(currentView.startsWith('m'))renderMember(parseInt(currentView.replace('m','')));
+}
+
+function renderMember(mi){
+  const m=MEMBERS[mi];
+  const nm=data.members[mi];
+  const s=memberScore(mi);
+  const myQs=data.questions.filter(q=>q.postedBy===mi);
+  const answered=data.questions.filter(q=>q.attempts&&q.attempts[mi]!==undefined).length;
+  const correctQ=data.questions.filter(q=>q.attempts&&q.attempts[mi]===true).length;
+
+  let html=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;">
+    <div class="member-avatar" style="width:44px;height:44px;font-size:16px;background:${m.bg};color:${m.color};">${m.initials}</div>
+    <div>
+      <input type="text" id="mname-${mi}" value="${nm.name}" onchange="renameMember(${mi},this.value)" style="font-size:15px;font-weight:500;border:none;background:transparent;padding:0;color:var(--color-text-primary);width:200px;" />
+      <p style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">Click name to rename</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;">
+    <div class="metric-card"><div class="metric-label">Total attempted</div><div class="metric-val">${s.attempted}</div></div>
+    <div class="metric-card"><div class="metric-label">Correct</div><div class="metric-val">${s.correct}</div></div>
+    <div class="metric-card"><div class="metric-label">Accuracy</div><div class="metric-val">${s.pct}%</div></div>
+    <div class="metric-card"><div class="metric-label">Qs answered</div><div class="metric-val">${answered}/${data.questions.length}</div></div>
+  </div>`;
+
+  if(myQs.length>0){
+    html+=`<p class="section-title">Questions posted by ${nm.name} (${myQs.length})</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem;">
+      ${myQs.map(q=>`<span class="badge" style="background:var(--color-background-secondary);color:var(--color-text-secondary);">${q.cat} #${q.id}</span>`).join('')}
+    </div>`;
+  }
+
+  html+=`<p class="section-title">Category progress</p>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;font-size:11px;color:var(--color-text-secondary);">
+    <span style="flex:2;">Category</span><span style="width:52px;text-align:center;">Tried</span><span style="width:52px;text-align:center;">Got right</span><span style="flex:2;text-align:center;">Score</span><span style="width:30px;text-align:right;">%</span>
+  </div>`;
+
+  CATEGORIES.forEach(cat=>{
+    const d2=nm.cats[cat];
+    const p=d2.attempted>0?Math.round(d2.correct/d2.attempted*100):null;
+    const pc=p!==null?barColor(p):null;
+    const safeId=cat.replace(/[^a-z0-9]/gi,'_');
+    html+=`<div class="cat-row">
+      <span style="flex:2;font-size:13px;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${cat}">${cat}</span>
+      <input type="number" class="small-input" min="0" value="${d2.attempted}" oninput="manualUpdate(${mi},'${cat}','attempted',this.value)" aria-label="Attempted">
+      <input type="number" class="small-input" min="0" value="${d2.correct}" oninput="manualUpdate(${mi},'${cat}','correct',this.value)" aria-label="Correct">
+      <div class="prog-wrap" style="flex:2;margin:0 8px;">
+        <div class="prog-bar" id="bar_${mi}_${safeId}" style="width:${p||0}%;background:${pc||'#ddd'};"></div>
+      </div>
+      <span id="pct_${mi}_${safeId}" style="font-size:12px;font-weight:500;width:30px;text-align:right;color:${pc||'var(--color-text-tertiary)'};">${p!==null?p+'%':'—'}</span>
+    </div>`;
+  });
+
+  document.getElementById(`view-m${mi}`).innerHTML=html;
+}
+
+function manualUpdate(mi,cat,field,val){
+  let v=parseInt(val)||0;if(v<0)v=0;
+  if(field==='correct'&&v>data.members[mi].cats[cat].attempted)v=data.members[mi].cats[cat].attempted;
+  data.members[mi].cats[cat][field]=v;save();
+  const p=data.members[mi].cats[cat].attempted>0?Math.round(data.members[mi].cats[cat].correct/data.members[mi].cats[cat].attempted*100):null;
+  const safeId=cat.replace(/[^a-z0-9]/gi,'_');
+  const bar=document.getElementById(`bar_${mi}_${safeId}`);
+  const pctEl=document.getElementById(`pct_${mi}_${safeId}`);
+  const pc=p!==null?barColor(p):null;
+  if(bar){bar.style.width=(p||0)+'%';bar.style.background=pc||'#ddd';}
+  if(pctEl){pctEl.textContent=p!==null?p+'%':'—';pctEl.style.color=pc||'var(--color-text-tertiary)';}
+  if(currentView==='leaderboard')renderLeaderboard();
+}
+
+function renameMember(mi,name){
+  if(!name.trim())return;
+  data.members[mi].name=name.trim();
+  save();
+  document.getElementById(`tn${mi}`).textContent=name.trim();
+  if(currentView==='leaderboard')renderLeaderboard();
+}
+
+function switchView(view,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  currentView=view;
+  if(view==='leaderboard')renderLeaderboard();
+  else if(view==='questions')renderQuestions();
+  else renderMember(parseInt(view.replace('m','')));
+}
+
+function resetAll(){
+  if(!confirm('Reset ALL data including questions and progress?'))return;
+  data={members:MEMBERS.map(m=>({name:m.name,cats:{}})),questions:[],nextId:1};
+  CATEGORIES.forEach(c=>data.members.forEach(m=>{m.cats[c]={attempted:0,correct:0};}));
+  revealedAnswers={};expandedAttempts={};showAddForm=false;
+  save();renderLeaderboard();renderQuestions();MEMBERS.forEach((m,i)=>renderMember(i));
+  switchView('leaderboard',document.querySelector('.tab'));
+}
+
+renderLeaderboard();
+</script>
+
+</body>
+</html>
