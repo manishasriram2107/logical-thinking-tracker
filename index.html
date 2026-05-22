@@ -119,7 +119,22 @@ input[type=number]::-webkit-inner-spin-button{opacity:1;}
 
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCk987i2adHcltSaKh8PsVfVKPsuxQrvyQ",
+  authDomain: "logical-thinking-tracker.firebaseapp.com",
+  projectId: "logical-thinking-tracker",
+  storageBucket: "logical-thinking-tracker.firebasestorage.app",
+  messagingSenderId: "713412609195",
+  appId: "1:713412609195:web:e87882291973182f2ce3ee"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const CATEGORIES=['Number Series','Letter and Symbol Series','Verbal Classification','Essential Part','Analogies','Artificial Language','Matching Definitions','Making Judgments','Verbal Reasoning','Logical Problems','Logical Games','Analyzing Arguments','Statement and Assumption','Course of Action','Statement and Conclusion','Theme Detection','Cause and Effect','Statement and Argument','Logical Deduction'];
 
 const MEMBERS=[
@@ -129,16 +144,46 @@ const MEMBERS=[
   {name:'Member 4',initials:'M4',bg:'#FBEAF0',color:'#993556',barColor:'#D4537E'}
 ];
 
-const SK='lt_v2';
-function loadData(){
-  try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}
-  const d={members:MEMBERS.map(m=>({name:m.name,cats:{}})),questions:[],nextId:1};
-  CATEGORIES.forEach(c=>d.members.forEach(m=>{m.cats[c]={attempted:0,correct:0};}));
+let data;
+let syncingFromFirebase = false;
+
+function defaultData(){
+  const d = {members: MEMBERS.map(m => ({name:m.name,cats:{}})), questions: [], nextId: 1};
+  CATEGORIES.forEach(c => d.members.forEach(m => { m.cats[c] = {attempted:0, correct:0}; }));
   return d;
 }
-function save(){try{localStorage.setItem(SK,JSON.stringify(data));}catch(e){}}
 
-let data=loadData();
+async function save(){
+  if(!data || syncingFromFirebase) return;
+  await db.collection("tracker").doc("main").set(data);
+}
+
+async function loadData(){
+  const doc = await db.collection("tracker").doc("main").get();
+
+  if(doc.exists){
+    data = doc.data();
+  } else {
+    data = defaultData();
+    await db.collection("tracker").doc("main").set(data);
+  }
+
+  renderAll();
+}
+
+function renderAll(){
+  renderLeaderboard();
+  renderQuestions();
+  MEMBERS.forEach((m,i)=>renderMember(i));
+}
+
+db.collection("tracker").doc("main").onSnapshot((doc)=>{
+  if(!doc.exists) return;
+  syncingFromFirebase = true;
+  data = doc.data();
+  renderAll();
+  syncingFromFirebase = false;
+});
 let currentView='leaderboard';
 let qFilter='all';
 let showAddForm=false;
@@ -485,7 +530,7 @@ function resetAll(){
   switchView('leaderboard',document.querySelector('.tab'));
 }
 
-renderLeaderboard();
+loadData();
 </script>
 
 </body>
